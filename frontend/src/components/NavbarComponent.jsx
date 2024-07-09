@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Navbar, Nav, Modal, Button, Card, Form, Spinner } from 'react-bootstrap'; // Corrected import statement
-
+import { Container, Navbar, Nav, Modal, Button, Card, Form, Spinner } from 'react-bootstrap';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import CartItems from './CartItem'; // Import the CartItems component
+import CartItems from './CartItem';
+import BarChartComponent from './BarChartComponent'; // Import the BarChartComponent
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -13,15 +13,16 @@ const Cards = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [showCartModal, setShowCartModal] = useState(false); // State to manage cart modal visibility
+    const [showBarChartModal, setShowBarChartModal] = useState(false); // State to manage bar chart modal visibility
+    const [showCartModal, setShowCartModal] = useState(false);
     const [pieChartData, setPieChartData] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [originalData, setOriginalData] = useState([]);
-    const [cartItems, setCartItems] = useState([]); // State to manage cart items
+    const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true); // Set loading to true when fetch starts
+            setLoading(true);
             try {
                 const response = await axios.get('http://localhost:4088/');
                 console.log('Fetched data:', response.data);
@@ -30,7 +31,7 @@ const Cards = () => {
             } catch (error) {
                 console.error('Error fetching data', error);
             } finally {
-                setLoading(false); // Set loading to false when fetch completes
+                setLoading(false);
             }
         };
 
@@ -108,7 +109,6 @@ const Cards = () => {
     };
 
     const handleBuyNow = () => {
-
         alert('Purchased items successfully');
         setCartItems([]);
     };
@@ -126,6 +126,7 @@ const Cards = () => {
                 <Navbar.Collapse id="navbarScroll">
                     <Nav className="me-auto my-2 my-lg-0" style={{ maxHeight: '100px' }} navbarScroll>
                         <Nav.Link onClick={handlePieChartClick}>Pie Chart</Nav.Link>
+                        <Nav.Link onClick={() => setShowBarChartModal(true)}>Bar Chart</Nav.Link> {/* Button to show bar chart */}
                     </Nav>
                     <Form className="d-flex">
                         <Form.Control
@@ -154,6 +155,21 @@ const Cards = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal for bar chart */}
+            <Modal show={showBarChartModal} onHide={() => setShowBarChartModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Price Range Bar Chart</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <BarChartComponent />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowBarChartModal(false)}>
                         Close
                     </Button>
                 </Modal.Footer>
@@ -196,9 +212,11 @@ const Cards = () => {
                                 <Card.Body>
                                     <Card.Text style={{ textAlign: "center", height: "20px" }}>{product.category.toUpperCase()}</Card.Text>
                                 </Card.Body>
-                                <Card.Footer>
-                                    <p>&#8377; {product.price}</p>
-                                    <Button variant="primary" onClick={() => handleAddToCart(product)}>Add to Cart</Button>
+                                <Card.Footer className="d-flex justify-content-between align-items-center">
+                                    <Button variant="primary" onClick={() => handleAddToCart(product)}>
+                                        Add to Cart
+                                    </Button>
+                                    <strong>${product.price}</strong>
                                 </Card.Footer>
                             </Card>
                         </div>
@@ -207,6 +225,6 @@ const Cards = () => {
             </div>
         </Container>
     );
-}
+};
 
 export default Cards;
